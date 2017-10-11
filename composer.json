@@ -1,0 +1,29 @@
+{
+    "name": "gonpre/docx",
+    "description": "laravel-docx is library created to parser docx files with all the content and styles and generate html based on it. This uses a cloudconvert account to transform wmf images not allowed in ",
+    "license": "BSD-2-Clause",
+    "authors": [
+        {
+            "name": "Francisco Gonzalez",
+            "email": "gonpre@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "~5.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "intervention/image": "^2.3",
+        "intervention/imagecache": "^2.3",
+        "robbiep/cloudconvert-laravel": "^2.3"
+    },
+    "require-dev":{
+        "phpspec/phpspec": "~2.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Gonpre\\Docx": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
