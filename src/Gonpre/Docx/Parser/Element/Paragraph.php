@@ -119,7 +119,7 @@ class Paragraph {
                                             $imgZipPath = $this->relations[$imgSrcId]['target'];
 
                                             if ($imageData = DocxFileReader::getFile($imgZipPath)) {
-                                                $id              = InfoDocx::getCurrent();
+                                                $id              = InfoDocx::getDocumentId();
                                                 $imgRelativePath = sprintf('doc/%s/', $id);
                                                 $imgFullPath     = sprintf('%s%s', config('docx.img_path'), $imgRelativePath);
                                                 $imageInfo       = pathinfo($imgZipPath);
@@ -187,7 +187,7 @@ class Paragraph {
                                 $imgZipPath = $this->relations[$imgSrcId]['target'];
 
                                 if ($imageData = DocxFileReader::getFile($imgZipPath)) {
-                                    $id              = InfoDocx::getCurrent();
+                                    $id              = InfoDocx::getDocumentId();
                                     $imgRelativePath = sprintf('doc/%s/', $id);
                                     $imgFullPath     = sprintf('%s%s', config('docx.img_path'), $imgRelativePath);
                                     $imageInfo       = pathinfo($imgZipPath);
