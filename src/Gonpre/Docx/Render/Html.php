@@ -46,15 +46,15 @@ class Html implements \Gonpre\Docx\Renderer
 
     private function generateHeader() {
         $this->html = '<style>';
-        $this->html .= '.law-content p:not(:empty),.law-content ol{margin:0}';
-        $this->html .= '.law-header p:not(:empty){margin:0;line-height:0}';
-        $this->html .= '.law-header p:not(:empty) span{line-height:normal}';
-        $this->html .= '.law-content table,.law-header table{border-collapse:collapse}';
-        $this->html .= '.law-header table td{vertical-align:top}';
+        $this->html .= '.docx-content p:not(:empty),.docx-content ol{margin:0}';
+        $this->html .= '.docx-header p:not(:empty){margin:0;line-height:0}';
+        $this->html .= '.docx-header p:not(:empty) span{line-height:normal}';
+        $this->html .= '.docx-content table,.docx-header table{border-collapse:collapse}';
+        $this->html .= '.docx-header table td{vertical-align:top}';
 
         foreach($this->styles as $styleId => $style) {
             $attrs = implode('; ', $style);
-            $this->html .= ".law-content .{$styleId} {{$attrs}}";
+            $this->html .= ".docx-content .{$styleId} {{$attrs}}";
         }
 
         $this->html .= '</style>';
@@ -63,7 +63,7 @@ class Html implements \Gonpre\Docx\Renderer
     }
 
     private function generateContent() {
-        $this->html .= '<div class="law-content">';
+        $this->html .= '<div class="docx-content">';
 
         foreach ($this->paragraphs as $currentParagraph) {
             $tag           = isset($currentParagraph['type']) ? $currentParagraph['type'] : '';

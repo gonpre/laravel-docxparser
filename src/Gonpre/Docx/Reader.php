@@ -298,7 +298,7 @@ class Reader {
     }
 
     public function headerToHtml() {
-        $headerHtml = '<div class="law-header">';
+        $headerHtml = '<div class="docx-header">';
 
         foreach ($this->header as $currentParagraph) {
             $tag           = isset($currentParagraph['type']) ? $currentParagraph['type'] : '';

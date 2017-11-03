@@ -77,6 +77,9 @@ class Styles
             case "tcW": // Table Cell width
                 if ($tagAttrs['w'] && isset($tagAttrs['type'])) {
                     switch ($tagAttrs['type']) {
+                        case 'auto':
+                            $classData[] = 'width: auto';
+                            break;
                         case 'dxa':
                             $classData[] = 'width: ' . DocxUnits::TwipToPixel($tagAttrs['w']) . 'px';
                             break;
