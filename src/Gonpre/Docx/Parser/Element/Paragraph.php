@@ -138,6 +138,7 @@ class Paragraph {
                                                                 break;
                                                             }
 
+                                                            \File::exists($tmpPath) or \File::makeDirectory($tmpPath, 0775, true);
                                                             DocxFileReader::extractTo($tmpPath, $imgZipPath);
                                                             \File::move($tmpPath . $imgZipPath, $imgFullPath . $imgName);
                                                             break;
