@@ -124,6 +124,7 @@ class Paragraph {
                                                 $imgFullPath     = sprintf('%s%s', config('docx.img_path'), $imgRelativePath);
                                                 $imageInfo       = pathinfo($imgZipPath);
 
+                                                \File::exists($imgFullPath) or \File::makeDirectory($imgFullPath, 0775, true);
 
                                                 if (isset($imageInfo['extension'])) {
                                                     switch ($imageInfo['extension']) {
@@ -209,6 +210,7 @@ class Paragraph {
                                                     break;
                                                 }
 
+                                                \File::exists($tmpPath) or \File::makeDirectory($tmpPath, 0775, true);
                                                 DocxFileReader::extractTo($tmpPath, $imgZipPath);
                                                 \File::move($tmpPath . $imgZipPath, $imgFullPath . $imgName);
                                                 break;
