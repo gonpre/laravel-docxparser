@@ -112,7 +112,7 @@ class Reader {
     }
 
     private function loadHeaderRelations() {
-        if ($headerRelsXml = DocxFileReader::getFile($this->headerPath['header_rel'])) {
+        if (isset($this->headerPath['header_rel'])) && $headerRelsXml = DocxFileReader::getFile($this->headerPath['header_rel'])) {
             $xml = simplexml_load_string($headerRelsXml);
 
             foreach ($xml->children() as $element) {
