@@ -129,7 +129,7 @@ class Paragraph {
                                                 if (isset($imageInfo['extension'])) {
                                                     switch ($imageInfo['extension']) {
                                                         case 'jpg':
-                                                        case 'jpge':
+                                                        case 'jpeg':
                                                         case 'png':
                                                         case 'gif':
                                                             $tmpPath = config('docx.tmp_path') . $imgRelativePath;
