@@ -148,6 +148,11 @@ class Styles
                 $classData[] = 'font-size: ' . ($tagAttrs['val'] - 5) . 'px';
                 $classData[] = 'line-height: ' . ($tagAttrs['val'] - 3) . 'px';
                 break;
+            case "shd": // Background Color
+                if ('auto' != $tagAttrs['fill']) {
+                    $classData[] = 'background-color: #' . $tagAttrs['fill'];
+                }
+                break;
             case "pBdr": // Border
             case "tblBorders": // Table Border
             case "tcBorders": // Table Cell Border
