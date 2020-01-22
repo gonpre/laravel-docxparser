@@ -270,6 +270,11 @@ class Paragraph {
                                 'styles' => '',
                                 'text'   => '{{simulate-newpage}}',
                             ];
+                        } else {
+                            $paragraph['texts'][] = [
+                                'styles' => '',
+                                'text'   => '{{simulate-br}}',
+                            ];
                         }
                     }
                 }

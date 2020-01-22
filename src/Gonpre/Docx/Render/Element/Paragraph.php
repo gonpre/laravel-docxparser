@@ -36,6 +36,9 @@ class Paragraph implements \Gonpre\Docx\Renderer
             } elseif ($textData['text'] == '{{simulate-newpage}}') {
                 $htmlContent[$currentText]   = [];
                 $htmlContent[$currentText][] = '<span class="js-simulate-newpage"></span>';
+            } elseif ($textData['text'] == '{{simulate-br}}') {
+                $htmlContent[$currentText]   = [];
+                $htmlContent[$currentText][] = '<br>';
             } else {
                 $styles = empty($textData['styles']) ? '' : ' style="' . $textData['styles'] . '"';
 
