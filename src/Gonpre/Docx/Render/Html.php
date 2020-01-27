@@ -4,13 +4,15 @@ use Gonpre\Docx\Render\Element\Factory as FactoryElementRender;
 
 class Html implements \Gonpre\Docx\Renderer
 {
-    protected $styles     = [];
-    protected $paragraphs = [];
-    protected $html       = '';
+    protected $styles        = [];
+    protected $defaultStyles = [];
+    protected $paragraphs    = [];
+    protected $html          = '';
 
-    public function __construct(array $paragraphs, array $styles = []) {
+    public function __construct(array $paragraphs, array $styles = [], array $defaultStyles = []) {
         $this->setParagraphs($paragraphs)
-            ->setStyles($styles);
+            ->setStyles($styles)
+            ->defaultStyles($defaultStyles);
     }
 
     public function setParagraphs(array $paragraphs) {
@@ -25,6 +27,12 @@ class Html implements \Gonpre\Docx\Renderer
 
     public function setStyles(array $styles) {
         $this->styles = $styles;
+
+        return $this;
+    }
+
+    public function setDefaultStyles(array $defaultStyles) {
+        $this->defaultStyles = $defaultStyles;
 
         return $this;
     }
@@ -51,6 +59,11 @@ class Html implements \Gonpre\Docx\Renderer
         $this->html .= '.docx-header p:not(:empty) span{line-height:normal}';
         $this->html .= '.docx-content table,.docx-header table{border-collapse:collapse}';
         $this->html .= '.docx-header table td{vertical-align:top}';
+
+        foreach($this->defaultStyles as $element => $defaultStyles) {
+            $attrs = implode('; ', $defaultStyles);
+            $this->html .= ".docx-content {$element} {{$attrs}}";
+        }
 
         foreach($this->styles as $styleId => $style) {
             $attrs = implode('; ', $style);

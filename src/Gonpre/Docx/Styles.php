@@ -184,11 +184,11 @@ class Styles
                 break;
             case "spacing":
                 if (isset($tagAttrs['after'])) {
-                    $classData[] = 'padding-bottom: ' . (DocxUnits::TwipToPixel($tagAttrs['after']) + 3) . 'px';
+                    $classData[] = 'margin-bottom: ' . (DocxUnits::TwipToPixel($tagAttrs['after']) + 3) . 'px';
                 }
 
                 if (isset($tagAttrs['before'])) {
-                    $classData[] = 'padding-top: ' . (DocxUnits::TwipToPixel($tagAttrs['before']) + 3) . 'px';
+                    $classData[] = 'margin-top: ' . (DocxUnits::TwipToPixel($tagAttrs['before']) + 3) . 'px';
                 }
 
                 if (isset($tagAttrs['line'])) {

@@ -27,6 +27,7 @@ class Reader {
     private $numbering        = [];
     private $paragraphs       = [];
     private $styles           = [];
+    private $defaultStyles    = [];
     private $zipFile          = false;
 
     private function load($file) {
@@ -161,7 +162,23 @@ class Reader {
             $styles     = DocxStyles::getClasses($children->style, $namespaces['w']);
 
             $this->styles = $styles;
+
+            $this->loadDefaultStyles($children);
         }
+
+        return $this;
+    }
+
+    private function loadDefaultStyles($xml) {
+        $namespaces      = $xml->getNamespaces(true);
+        $docDefaults     = $xml->docDefaults->children($namespaces['w']);
+        $rPrDefault      = $docDefaults->rPrDefault->children($namespaces['w']);
+        $textStyles      = DocxStyles::getClassData($rPrDefault, $namespaces['w']);
+        $pPrDefault      = $docDefaults->pPrDefault->children($namespaces['w']);
+        $paragraphStyles = DocxStyles::getClassData($pPrDefault, $namespaces['w']);
+
+        $this->defaultStyles['span'] = $textStyles;
+        $this->defaultStyles['p']    = $paragraphStyles;
 
         return $this;
     }
@@ -280,7 +297,7 @@ class Reader {
     }
 
     public function toHTML() {
-        $renderer = new HtmlRender($this->paragraphs, $this->styles);
+        $renderer = new HtmlRender($this->paragraphs, $this->styles, $this->defaultStyles);
 
         return $renderer->render();
     }
@@ -320,5 +337,9 @@ class Reader {
 
     public function getStyles() {
         return $this->styles;
+    }
+
+    public function getDefaultStyles() {
+        return $this->defaultStyles;
     }
 }
