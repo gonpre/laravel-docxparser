@@ -247,6 +247,19 @@ class Paragraph {
                         $textStyles = DocxStyles::getClassData($propertyData, $this->namespace);
                         $text       = (String) $propertyElementData;
 
+                        // Validate toggle styles
+                        if (!empty($paragraph['class'])) {
+                            if (in_array('font-weight: bold', $textStyles) && in_array('font-weight: bold', $this->styles[$paragraph['class']])) {
+                                $index = array_search('font-weight: bold', $textStyles);
+                                $textStyles[$index] = 'font-weight: normal';
+                            }
+
+                            if (in_array('font-style: italic', $textStyles) && in_array('font-style: italic', $this->styles[$paragraph['class']])) {
+                                $index = array_search('font-style: italic', $textStyles);
+                                $textStyles[$index] = 'font-style: normal';
+                            }
+                        }
+
                         $paragraph['texts'][] = [
                             'styles' => implode('; ', $textStyles),
                             'text'   => $text,

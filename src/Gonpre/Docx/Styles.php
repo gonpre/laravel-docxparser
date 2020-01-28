@@ -226,7 +226,15 @@ class Styles
 
                     foreach ($classData as $value) {
                         list($k, $v) = explode(': ', $value);
-                        $tmpBasedOn[$k] = $v;
+
+                        // Toggle styles
+                        if ($k == 'font-weight' && !empty($tmpBasedOn[$k]) && $tmpBasedOn[$k] == 'bold') {
+                            $tmpBasedOn[$k] = 'normal';
+                        } else if ($k == 'font-style' && !empty($tmpBasedOn[$k]) && $tmpBasedOn[$k] == 'italic') {
+                            $tmpBasedOn[$k] = 'normal';
+                        } else {
+                            $tmpBasedOn[$k] = $v;
+                        }
                     }
 
                     foreach ($tmpBasedOn as $key => $value) {
