@@ -151,6 +151,10 @@ class Styles
             case "shd": // Background Color
                 if ('auto' != $tagAttrs['fill']) {
                     $classData[] = 'background-color: #' . $tagAttrs['fill'];
+                    $classData[] = 'color: #FFF';
+                } else if (!empty($tagAttrs['color']) && $tagAttrs['fill'] == 'auto' && $tagAttrs['val'] == 'solid') {
+                    $classData[] = 'background-color: #' . $tagAttrs['color'];
+                    $classData[] = 'color: #FFF';
                 }
                 break;
             case "pBdr": // Border
