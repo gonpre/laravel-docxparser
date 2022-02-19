@@ -24,35 +24,36 @@ class Paragraph {
         $this->relations = $relations;
     }
 
-    private function convertImage($srcPath, $srcName, $destinationPath, $destinationName) {
+    private function convertImage($id, $src, $destination) {
         $job = (new Job())
-            ->setTag("convert-{$srcName}")
+            ->setTag("convert-{$id}")
             ->addTask(
-                (new Task('import/upload', "upload-{$srcName}"))
+                (new Task('import/upload', "upload-{$id}"))
             )
             ->addTask(
-                (new Task('convert', "convert-{$srcName}"))
-                  ->set('input', ["upload-{$srcName}"])
+                (new Task('convert', "convert-{$id}"))
+                  ->set('input', ["upload-{$id}"])
                   ->set('output_format', 'png')
-                  ->set('filename', $destinationName)
+                  ->set('filename', $id . '.png')
             )
             ->addTask(
-                (new Task('export/url', "export-{$srcName}"))
-                  ->set('input', ["convert-{$srcName}"])
+                (new Task('export/url', "export-{$id}"))
+                  ->set('input', ["convert-{$id}"])
             );
 
         CloudConvert::jobs()->create($job);
-        $uploadTask = $job->getTasks()->whereName("upload-{$srcName}")[0];
-        $inputStream = fopen(Storage::path($srcPath . $srcName), 'r');
+        $uploadTask = $job->getTasks()->whereName("upload-{$id}")[0];
+        $inputStream = fopen($src, 'r');
         CloudConvert::tasks()->upload($uploadTask, $inputStream);
 
         CloudConvert::Jobs()->wait($job);
         foreach ($job->getExportUrls() as $file) {
             $source = CloudConvert::getHttpTransport()->download($file->url)->detach();
-            $dest = fopen(Storage::path($destinationPath . $destinationName), 'w');
+            $dest = fopen($destination, 'w');
 
             stream_copy_to_stream($source, $dest);
         }
+        CloudConvert::Jobs()->wait($job);
     }
 
     public function parse() {
@@ -187,7 +188,7 @@ class Paragraph {
 
                                                             \File::exists($tmpPath) or \File::makeDirectory($tmpPath, 0775, true);
                                                             DocxFileReader::extractTo($tmpPath, $imgZipPath);
-                                                            convertImage($tmpPath, $imgZipPath, $imgFullPath, $imgName);
+                                                            $this->convertImage($imgSrcId, $tmpPath . $imgZipPath, $imgFullPath . $imgName);
                                                             break;
                                                     }
                                                 }
@@ -259,7 +260,7 @@ class Paragraph {
 
                                                 \File::exists($tmpPath) or \File::makeDirectory($tmpPath, 0775, true);
                                                 DocxFileReader::extractTo($tmpPath, $imgZipPath);
-                                                convertImage($tmpPath, $imgZipPath, $imgFullPath, $imgName);
+                                                $this->convertImage($imgSrcId, $tmpPath . $imgZipPath, $imgFullPath . $imgName);
                                                 break;
                                         }
                                     }
