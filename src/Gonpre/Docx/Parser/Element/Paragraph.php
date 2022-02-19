@@ -5,7 +5,9 @@ use Gonpre\Docx\Styles as DocxStyles;
 use Gonpre\Docx\Listing as ListingFollower;
 use Gonpre\Docx\FileReader as DocxFileReader;
 use Gonpre\Docx\Info as InfoDocx;
-use CloudConvert;
+use \CloudConvert\Laravel\Facades\CloudConvert;
+use \CloudConvert\Models\Job;
+use \CloudConvert\Models\Task;
 
 class Paragraph {
     protected $element   = [];
@@ -20,6 +22,37 @@ class Paragraph {
         $this->styles    = $styles;
         $this->numbering = $numbering;
         $this->relations = $relations;
+    }
+
+    private function convertImage($srcPath, $srcName, $destinationPath, $destinationName) {
+        $job = (new Job())
+            ->setTag("convert-{$srcName}")
+            ->addTask(
+                (new Task('import/upload', "upload-{$srcName}"))
+            )
+            ->addTask(
+                (new Task('convert', "convert-{$srcName}"))
+                  ->set('input', ["upload-{$srcName}"])
+                  ->set('output_format', 'png')
+                  ->set('filename', $destinationName)
+            )
+            ->addTask(
+                (new Task('export/url', "export-{$srcName}"))
+                  ->set('input', ["convert-{$srcName}"])
+            );
+
+        CloudConvert::jobs()->create($job);
+        $uploadTask = $job->getTasks()->whereName("upload-{$srcName}")[0];
+        $inputStream = fopen(Storage::path($srcPath . $srcName), 'r');
+        CloudConvert::tasks()->upload($uploadTask, $inputStream);
+
+        CloudConvert::Jobs()->wait($job);
+        foreach ($job->getExportUrls() as $file) {
+            $source = CloudConvert::getHttpTransport()->download($file->url)->detach();
+            $dest = fopen(Storage::path($destinationPath . $destinationName), 'w');
+
+            stream_copy_to_stream($source, $dest);
+        }
     }
 
     public function parse() {
@@ -154,9 +187,7 @@ class Paragraph {
 
                                                             \File::exists($tmpPath) or \File::makeDirectory($tmpPath, 0775, true);
                                                             DocxFileReader::extractTo($tmpPath, $imgZipPath);
-                                                            CloudConvert::file($tmpPath . $imgZipPath)->to($imgFullPath . $imgName);
-                                                                // ->callback(route('v1.service.image', ['image' => urlencode($imgFullPath . $imgName)]))
-                                                                // ->convert('png');
+                                                            convertImage($tmpPath, $imgZipPath, $imgFullPath, $imgName);
                                                             break;
                                                     }
                                                 }
@@ -228,9 +259,7 @@ class Paragraph {
 
                                                 \File::exists($tmpPath) or \File::makeDirectory($tmpPath, 0775, true);
                                                 DocxFileReader::extractTo($tmpPath, $imgZipPath);
-                                                CloudConvert::file($tmpPath . $imgZipPath)->to($imgFullPath . $imgName);
-                                                    // ->callback(route('v1.service.image', ['image' => urlencode($imgFullPath . $imgName)]))
-                                                    // ->convert('png');
+                                                convertImage($tmpPath, $imgZipPath, $imgFullPath, $imgName);
                                                 break;
                                         }
                                     }
