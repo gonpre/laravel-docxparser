@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": "^7.1 || ^8.0",
-        "cloudconvert/cloudconvert-laravel": "dev-master"
+        "cloudconvert/cloudconvert-laravel": "^1.1.1"
     },
     "require-dev":{
         "phpspec/phpspec": "^2.0"

@@ -32,28 +32,69 @@ class Paragraph {
             )
             ->addTask(
                 (new Task('convert', "convert-{$id}"))
-                  ->set('input', ["upload-{$id}"])
+                  ->set('input', "upload-{$id}")
                   ->set('output_format', 'png')
                   ->set('filename', $id . '.png')
             )
             ->addTask(
                 (new Task('export/url', "export-{$id}"))
-                  ->set('input', ["convert-{$id}"])
+                  ->set('input', "convert-{$id}")
             );
 
         CloudConvert::jobs()->create($job);
+
         $uploadTask = $job->getTasks()->whereName("upload-{$id}")[0];
         $inputStream = fopen($src, 'r');
-        CloudConvert::tasks()->upload($uploadTask, $inputStream);
 
-        CloudConvert::Jobs()->wait($job);
-        foreach ($job->getExportUrls() as $file) {
-            $source = CloudConvert::getHttpTransport()->download($file->url)->detach();
-            $dest = fopen($destination, 'w');
+        try {
+            CloudConvert::tasks()->upload($uploadTask, $inputStream, basename($src));
+            CloudConvert::jobs()->wait($job);
 
-            stream_copy_to_stream($source, $dest);
+            if ($job->getStatus() === Job::STATUS_ERROR) {
+                $errorMessages = [];
+
+                foreach ($job->getTasks() as $task) {
+                    if ($task->getStatus() === Task::STATUS_ERROR && $task->getMessage()) {
+                        $errorMessages[] = $task->getName() . ': ' . $task->getMessage();
+                    }
+                }
+
+                throw new \RuntimeException(sprintf(
+                    'CloudConvert job failed converting image %s%s',
+                    $id,
+                    $errorMessages ? ' (' . implode('; ', $errorMessages) . ')' : ''
+                ));
+            }
+
+            $exportUrls = $job->getExportUrls();
+
+            if (empty($exportUrls)) {
+                throw new \RuntimeException(sprintf(
+                    'CloudConvert job completed without export URLs for image %s',
+                    $id
+                ));
+            }
+
+            foreach ($exportUrls as $file) {
+                $source = CloudConvert::getHttpTransport()->download($file->url)->detach();
+                $dest = fopen($destination, 'w');
+
+                try {
+                    stream_copy_to_stream($source, $dest);
+                } finally {
+                    if (is_resource($source)) {
+                        fclose($source);
+                    }
+                    if (is_resource($dest)) {
+                        fclose($dest);
+                    }
+                }
+            }
+        } finally {
+            if (is_resource($inputStream)) {
+                fclose($inputStream);
+            }
         }
-        CloudConvert::Jobs()->wait($job);
     }
 
     public function parse() {
