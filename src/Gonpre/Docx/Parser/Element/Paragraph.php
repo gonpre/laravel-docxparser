@@ -5,9 +5,9 @@ use Gonpre\Docx\Styles as DocxStyles;
 use Gonpre\Docx\Listing as ListingFollower;
 use Gonpre\Docx\FileReader as DocxFileReader;
 use Gonpre\Docx\Info as InfoDocx;
-use \CloudConvert\Laravel\Facades\CloudConvert;
-use \CloudConvert\Models\Job;
-use \CloudConvert\Models\Task;
+use CloudConvert\CloudConvert;
+use CloudConvert\Models\Job;
+use CloudConvert\Models\Task;
 
 class Paragraph {
     protected $element   = [];
@@ -24,7 +24,31 @@ class Paragraph {
         $this->relations = $relations;
     }
 
+    private static function cloudConvertClient() {
+        static $client = null;
+
+        if ($client !== null) {
+            return $client;
+        }
+
+        $key = preg_replace('/[^A-Za-z0-9._\-\/=+]/', '', (string) config('cloudconvert.api_key'));
+
+        if ($key === '') {
+            throw new \RuntimeException(
+                'CLOUDCONVERT_API_KEY is missing or invalid. Set a single-line CloudConvert API v2 JWT and restart queue workers.'
+            );
+        }
+
+        $client = new CloudConvert([
+            'api_key' => $key,
+            'sandbox' => filter_var(config('cloudconvert.sandbox'), FILTER_VALIDATE_BOOLEAN),
+        ]);
+
+        return $client;
+    }
+
     private function convertImage($id, $src, $destination) {
+        $cloudconvert = self::cloudConvertClient();
         $job = (new Job())
             ->setTag("convert-{$id}")
             ->addTask(
@@ -41,14 +65,14 @@ class Paragraph {
                   ->set('input', "convert-{$id}")
             );
 
-        CloudConvert::jobs()->create($job);
+        $cloudconvert->jobs()->create($job);
 
         $uploadTask = $job->getTasks()->whereName("upload-{$id}")[0];
         $inputStream = fopen($src, 'r');
 
         try {
-            CloudConvert::tasks()->upload($uploadTask, $inputStream, basename($src));
-            CloudConvert::jobs()->wait($job);
+            $cloudconvert->tasks()->upload($uploadTask, $inputStream, basename($src));
+            $cloudconvert->jobs()->wait($job);
 
             if ($job->getStatus() === Job::STATUS_ERROR) {
                 $errorMessages = [];
@@ -76,7 +100,7 @@ class Paragraph {
             }
 
             foreach ($exportUrls as $file) {
-                $source = CloudConvert::getHttpTransport()->download($file->url)->detach();
+                $source = $cloudconvert->getHttpTransport()->download($file->url)->detach();
                 $dest = fopen($destination, 'w');
 
                 try {
