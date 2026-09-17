@@ -296,9 +296,6 @@ class Paragraph {
                                                     break;
                                                 }
 
-                                                echo $imgFullPath . $imgName, PHP_EOL;
-                                                echo $tmpPath . $imgZipPath, PHP_EOL;
-
                                                 \File::exists($tmpPath) or \File::makeDirectory($tmpPath, 0775, true);
                                                 DocxFileReader::extractTo($tmpPath, $imgZipPath);
                                                 $this->convertImage($imgSrcId, $tmpPath . $imgZipPath, $imgFullPath . $imgName);
